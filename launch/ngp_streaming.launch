@@ -1,0 +1,4 @@
+<launch>
+    <node pkg="ngp_streaming" name="ngp_receiver" type="ngp_receiver.py" />
+    <node pkg="rviz" type="rviz" name="rviz" args="-d $(find ngp_streaming)/rviz/stream.rviz" />
+</launch>
