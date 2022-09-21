@@ -208,3 +208,6 @@ include_directories(
 catkin_install_python(PROGRAMS scripts/ngp_receiver.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
+catkin_install_python(PROGRAMS scripts/stringPublisher.py
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)

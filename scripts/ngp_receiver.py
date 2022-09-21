@@ -6,15 +6,22 @@ from sensor_msgs.msg import Image
 import socket
 import matplotlib.pyplot as plt
 import numpy as np
+import time
+from cv_bridge import CvBridge
 
 global s
 
 def ngp_display():
+    bridge = CvBridge()
     pub = rospy.Publisher('ngp_image', Image, queue_size=10)
     rospy.init_node('ngp_display', anonymous=True)
     rate = rospy.Rate(10) # 10hz
+
+    time.sleep(10)
+
     while not rospy.is_shutdown():
 #        data = b""
+        start = time.time()
         fragments = []
         s.send(b"go")
         while True:
@@ -31,31 +38,34 @@ def ngp_display():
 #        plt.show()
 #        print(final.shape)
 
-        head = Header()
-        head.seq = 1
-        head.stamp.secs = 1
-        head.stamp.nsecs = 1
-        head.frame_id = "1"
+#        head = Header()
+#        head.seq = 1
+#        head.stamp.secs = 1
+#        head.stamp.nsecs = 1
+#        head.frame_id = "1"
 
-        msg = Image()
-        msg.header = head
-        msg.height = final.shape[0]
-        msg.width = final.shape[1]
-        msg.step = final.shape[1] * 3
-        msg.encoding = "rgb8"
-        msg.is_bigendian = 0 
-        convertedData = np.zeros((msg.height, msg.step), dtype = 'int')
+#        msg = Image()
+#        msg.header = head
+#        msg.height = final.shape[0]
+#        msg.width = final.shape[1]
+#        msg.step = final.shape[1] * 3
+#        msg.encoding = "rgb8"
+#        msg.is_bigendian = 0 
+#        convertedData = np.zeros((msg.height, msg.step), dtype = 'int')
+#        print(final.shape)
+#        for i in np.arange(final.shape[0]):
+#            for j in np.arange(final.shape[1]):
+#                convertedData[i,j * 3] = final[i, j, 0]
+#                convertedData[i,j * 3 + 1] = final[i, j, 1]
+#                convertedData[i,j * 3 + 2] = final[i, j ,2]
+         
+#        print(time.time() - start)
+#        msg.data = convertedData.reshape(msg.height * msg.step).tolist()
 
-        for i in np.arange(final.shape[0]):
-            for j in np.arange(final.shape[1]):
-                convertedData[i,j * 3] = final[i, j, 0]
-                convertedData[i,j * 3 + 1] = final[i, j, 1]
-                convertedData[i,j * 3 + 2] = final[i, j ,2]
-
-        msg.data = convertedData.reshape(msg.height * msg.step).tolist()
         
-        pub.publish(msg)
-
+        pub.publish(bridge.cv2_to_imgmsg(final, encoding="rgb8"))
+        rospy.loginfo(time.time() - start)
+        print(time.time() - start)
         rate.sleep()
 
 if __name__ == '__main__':
